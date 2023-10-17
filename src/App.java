@@ -1,9 +1,15 @@
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +30,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class App extends Application {
@@ -45,6 +52,9 @@ public class App extends Application {
     // Método principal de la aplicación donde se construye y muestra la interfaz
     @Override
     public void start(Stage primaryStage) {
+        // Crea un FileChooser para abrir y guardar archivos
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Dubujito en DibuJava", "*.dibu"));
 
         // Crea un GridPane que contendrá los Rectangles (pixels)
         GridPane grid = new GridPane();
@@ -63,43 +73,41 @@ public class App extends Application {
                 grid.add(rect, x, y);
             }
         }
-        
-        //Titulo
+
+        // Titulo
         Label lbTitulo = new Label("DibuJava");
-        lbTitulo.setFont(Font.font("Arial",FontWeight.BOLD, 30));
+        lbTitulo.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         StackPane titulo = new StackPane(lbTitulo);
         StackPane.setMargin(lbTitulo, new Insets(10));
 
-        //Menu bajo
+        // Menu bajo
 
         // ColorPicker
         colorPicker.setValue(Color.BLACK); // Color inicial del ColorPicker
 
-        //boton de borrar
+        // boton de borrar
         Button btnBorrar = new Button("Borrar Pantalla", new ImageView(new Image("img/borrarPantalla.png")));
-        
-        //Boton del borrador
+
+        // Boton del borrador
         Button btnBorrador = new Button("Borrador", new ImageView(new Image("img/borrador.png")));
 
-        //Boton del lapiz
-        Button btnLapiz = new Button("Lapiz",new ImageView(new Image("img/lapiz.png")));
+        // Boton del lapiz
+        Button btnLapiz = new Button("Lapiz", new ImageView(new Image("img/lapiz.png")));
 
-        //Boton de cargar
-        Button btnCargar = new Button("Cargar Imagen", new ImageView(new Image("img/importar.png"))   );
+        // Boton de cargar
+        Button btnCargar = new Button("Cargar Imagen", new ImageView(new Image("img/importar.png")));
 
-        //Boton de guardar
+        // Boton de guardar
         Button btnGuardar = new Button("Guardar Imagen", new ImageView(new Image("img/guardar.png")));
-        
 
-        HBox menuBajo = new HBox(20,colorPicker,btnLapiz,btnBorrador,btnBorrar); // Crear el Menu Bajo
+        HBox menuBajo = new HBox(20, colorPicker, btnLapiz, btnBorrador, btnBorrar); // Crear el Menu Bajo
         menuBajo.setAlignment(Pos.CENTER);
-        HBox menuBox2 = new HBox(20,btnCargar,btnGuardar);
+        HBox menuBox2 = new HBox(20, btnCargar, btnGuardar);
         menuBox2.setAlignment(Pos.CENTER);
 
         // Formacion de los componentes
         grid.setAlignment(Pos.CENTER);
-        VBox leayer = new VBox(10,titulo,grid, menuBajo, menuBox2); // 5 es el espaciado entre los elementos del VBox
-
+        VBox leayer = new VBox(10, titulo, grid, menuBajo, menuBox2); // 5 es el espaciado entre los elementos del VBox
 
         // -------------------------Eventos-----------------------------------
 
@@ -117,89 +125,73 @@ public class App extends Application {
             }
         });
 
-        //boton de borrar
+        // boton de borrar
         btnBorrar.setOnAction(e -> {
             for (int y = 0; y < HEIGHT; y++) {
-                for (int x = 0; x < WIDTH; x++) {                    
+                for (int x = 0; x < WIDTH; x++) {
                     rects[x][y].setFill(Color.WHITE); // Usamos el color seleccionado en el ColorPicker
                 }
             }
         });
 
-        //boton de borrador
+        // boton de borrador
         btnBorrador.setOnAction(e -> {
             lapiz = colorPicker.getValue();
             colorPicker.setValue(Color.WHITE);
         });
 
-        //Boton del lapiz
+        // Boton del lapiz
         btnLapiz.setOnAction(e -> {
             colorPicker.setValue(lapiz);
         });
 
-
-        //Boton de guardar en mi propio formatio .dibu
+        // Boton de guardar en mi propio formatio .dibu
         btnGuardar.setOnAction(e -> {
             String archivo = "";
 
             String dibujo[][] = new String[WIDTH][HEIGHT];
             Set<String> colores = new HashSet<>();
-            //Revisa los colores y los guarda de manera que no se repitan
+            // Revisa los colores y los guarda de manera que no se repitan
             for (int i = 0; i < WIDTH; i++) {
                 for (int j = 0; j < HEIGHT; j++) {
                     Color color = (Color) rects[i][j].getFill();
                     colores.add(String.format("#%02X%02X%02X",
-                        (int) (color.getRed() * 255),
-                        (int) (color.getGreen() * 255),
-                        (int) (color.getBlue() * 255)));
+                            (int) (color.getRed() * 255),
+                            (int) (color.getGreen() * 255),
+                            (int) (color.getBlue() * 255)));
                 }
             }
             List<String> coloresList = new ArrayList<>(colores);
-            //Guarda los colores en un array de bytes
+            // Guarda los colores en un array de bytes
             for (int i = 0; i < WIDTH; i++) {
                 for (int j = 0; j < HEIGHT; j++) {
                     String tempColor = String.format("#%02X%02X%02X",
-                        (int) (((Color) rects[i][j].getFill()).getRed() * 255),
-                        (int) (((Color) rects[i][j].getFill()).getGreen() * 255),
-                        (int) (((Color) rects[i][j].getFill()).getBlue() * 255));
+                            (int) (((Color) rects[i][j].getFill()).getRed() * 255),
+                            (int) (((Color) rects[i][j].getFill()).getGreen() * 255),
+                            (int) (((Color) rects[i][j].getFill()).getBlue() * 255));
                     byte lugar = (byte) coloresList.indexOf(tempColor);
-                    if(lugar != -1){
-                         String numerin = Integer.toBinaryString(lugar); // Convierte el número a binario y lo guarda en un String manteniendo los 0 a la izquierda
+                    if (lugar != -1) {
+                        String numerin = Integer.toBinaryString(lugar); // Convierte el número a binario y lo guarda en
+                                                                        // un String manteniendo los 0 a la izquierda
                         while (numerin.length() < 8) {
                             numerin = "0" + numerin;
-                    }
-                        dibujo[i][j] = numerin; // Guarda el numero en el array 
-                    }
-                    else
-                    System.out.println("Error al guardar");
-                    
+                        }
+                        dibujo[i][j] = numerin; // Guarda el numero en el array
+                    } else
+                        mostrarError("Error al guardar");
+
                 }
             }
-            //Imprime el array de bytes
-            for (int i = 0; i < WIDTH; i++) {
-                for (int j = 0; j < HEIGHT; j++) {
-                    
-                    System.out.print(dibujo[j][i]+", ");
-                }
-                System.out.println("");
 
-            }
-            System.out.println();
-
-            //Pasar la primera fila a hexadecimal
-            
-            
-            
-            
-            //----Guardar en el archivo----
-            //Guardar colores
-            archivo += coloresList.size() + " ";//Numero de colores
+            // ----Guardar en el archivo----
+            // Guardar colores
+            archivo += coloresList.size() + " ";// Numero de colores
             for (String string : coloresList) {
                 archivo += string + " ";
             }
-            
-            //Tamaño del hexadecimal
-            //Guardar dibujo en hexadecimal por cada fila
+
+            // Tamaño del hexadecimal
+            // Guardar dibujo en hexadecimal por cada fila
             String binario = "";
             StringBuilder hexadecimal = new StringBuilder();
             for (int i = 0; i < WIDTH; i++) {
@@ -209,17 +201,82 @@ public class App extends Application {
                 for (int k = binario.length(); k > 0; k -= 4) {
                     String cuarteto = binario.substring(k - 4, k);
                     int valorDecimal = Integer.parseInt(cuarteto, 2);
-                    hexadecimal.insert(0, Integer.toHexString(valorDecimal).toUpperCase());//Tamaño del hexadecimal = 32
+                    hexadecimal.insert(0, Integer.toHexString(valorDecimal).toUpperCase());// Tamaño del hexadecimal =
+                                                                                           // 32
                 }
                 archivo += hexadecimal.toString() + " ";
                 binario = "";
                 hexadecimal = new StringBuilder();
 
             }
-
+            /*
+             * 1. Guardar el numero de colores
+             * 2. Guardar los colores
+             * 3. Guardar el dibujo en hexadecimal
+             * 
+             */
+            // Guardar el archivo
+            File file = fileChooser.showSaveDialog(primaryStage); // Asume que primaryStage es tu Stage principal
+            if (file != null) {
+                saveToFile(file, archivo);
+            }
             System.out.println(archivo);
         });
 
+        // Boton de cargar
+        btnCargar.setOnAction(e -> {
+            String[][] dibujo = new String[WIDTH][HEIGHT];
+            String archivo = "";
+            // Cargar archivo
+            File file = fileChooser.showOpenDialog(primaryStage); // Asume que primaryStage es tu Stage principal
+            if (file == null) {
+                return;
+            }
+            archivo = abrirYLeerArchivo(file);
+            System.out.println(archivo);
+            String[] datos = archivo.split(" ");
+
+            // Sacar los colores
+            int numeroColores = Integer.parseInt(datos[0]);
+            String[] colores = new String[numeroColores];
+            for (int i = 0; i < numeroColores; i++) {
+                colores[i] = datos[i + 1];
+            }
+            // Sacar los hexadecimales que valen por cada fila
+            String[] hexadecimal = new String[datos.length - numeroColores - 1];
+            String binario = new String();
+            for (int i = 0; i < hexadecimal.length; i++) {
+                hexadecimal[i] = datos[i + numeroColores + 1];
+                // Convertir los hexadecimales a binario
+                
+                for (char digitoHex : hexadecimal[i].toCharArray()) {
+                    // Convertir el dígito hexadecimal a entero
+                    int valorDecimal = Integer.parseInt(Character.toString(digitoHex), 16);
+
+                    // Convertir el entero a una cadena binaria de 4 bits
+                    String representacionBinaria = String.format("%4s", Integer.toBinaryString(valorDecimal)).replace(
+                            ' ',
+                            '0');
+
+                    binario= representacionBinaria;
+                }
+                int cont = 0;
+                for (int j = 0; j < WIDTH; j++) {
+                    dibujo[i][j] = (binario.substring(cont, cont+8));
+                    cont+=8;
+                }
+            }
+
+            for (int i = 0; i < dibujo.length; i++) {
+                for (int j = 0; j < dibujo.length; j++) {
+                    System.out.print(dibujo[i][j]+", ");
+                }
+                System.out.println();
+            }
+
+            
+
+        });
 
         // Detecta cuando el ratón es liberado
         grid.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> dragging = false);
@@ -235,7 +292,7 @@ public class App extends Application {
         primaryStage.setScene(scene);
         primaryStage.setTitle("DibuJava"); // Título de la ventana
 
-        //Tamaño minimo por defecto
+        // Tamaño minimo por defecto
         primaryStage.showingProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 primaryStage.setMinWidth(primaryStage.getWidth());
@@ -259,8 +316,50 @@ public class App extends Application {
             // System.out.println("Con el color: "+rects[x][y].getFill());
         }
     }
-    
-    
+
+    // Guardar un archivo
+    private void saveToFile(File file, String texto) {
+        try {
+            FileWriter writer = new FileWriter(file);
+            writer.write(texto); // Aquí escribe los datos que desees guardar
+            writer.close();
+        } catch (IOException ex) {
+            mostrarError("Error al guardar el archivo: " + ex.getMessage());
+        }
+
+    }
+
+    private void pintarCeldas(int i, int j, String color) {
+        rects[i][j].setFill(Color.web(color));
+    }
+
+    // Abrir y leer Archivo
+    private String abrirYLeerArchivo(File file) {
+        try {
+            FileReader reader = new FileReader(file);
+            BufferedReader bufferedReader = new BufferedReader(reader);
+
+            String line = "";
+            String texto = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                texto += line; // Aquí procesa los datos que lees del archivo
+            }
+            bufferedReader.close();
+            return texto;
+        } catch (IOException ex) {
+            mostrarError("Error al leer el archivo: " + ex.getMessage());
+        }
+        return "";
+
+    }
+
+    private void mostrarError(String errorMessage) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null); // No queremos un encabezado
+        alert.setContentText(errorMessage);
+        alert.showAndWait();
+    }
 
     public static void main(String[] args) {
         launch(args);
