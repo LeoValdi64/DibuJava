@@ -1,8 +1,17 @@
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
@@ -23,6 +32,7 @@ public class App extends Application {
     private static final int WIDTH = 16;
     private static final int HEIGHT = 16;
     private static final int PIXEL_SIZE = 35;
+    private static Color lapiz = Color.BLACK;
 
     // Matriz para guardar una referencia a cada Rectangle (pixel)
     private Rectangle[][] rects = new Rectangle[WIDTH][HEIGHT];
@@ -66,14 +76,29 @@ public class App extends Application {
         colorPicker.setValue(Color.BLACK); // Color inicial del ColorPicker
 
         //boton de borrar
-        Button btnBorrar = new Button("Borrar");
+        Button btnBorrar = new Button("Borrar Pantalla", new ImageView(new Image("img/borrarPantalla.png")));
+        
+        //Boton del borrador
+        Button btnBorrador = new Button("Borrador", new ImageView(new Image("img/borrador.png")));
+
+        //Boton del lapiz
+        Button btnLapiz = new Button("Lapiz",new ImageView(new Image("img/lapiz.png")));
+
+        //Boton de cargar
+        Button btnCargar = new Button("Cargar Imagen", new ImageView(new Image("img/importar.png"))   );
+
+        //Boton de guardar
+        Button btnGuardar = new Button("Guardar Imagen", new ImageView(new Image("img/guardar.png")));
         
 
+        HBox menuBajo = new HBox(20,colorPicker,btnLapiz,btnBorrador,btnBorrar); // Crear el Menu Bajo
+        menuBajo.setAlignment(Pos.CENTER);
+        HBox menuBox2 = new HBox(20,btnCargar,btnGuardar);
+        menuBox2.setAlignment(Pos.CENTER);
 
-        HBox menuBajo = new HBox(20,colorPicker,btnBorrar); // Crear el Menu Bajo
-        
         // Formacion de los componentes
-        VBox leayer = new VBox(5,titulo,grid, menuBajo); // 5 es el espaciado entre los elementos del VBox
+        grid.setAlignment(Pos.CENTER);
+        VBox leayer = new VBox(10,titulo,grid, menuBajo, menuBox2); // 5 es el espaciado entre los elementos del VBox
 
 
         // -------------------------Eventos-----------------------------------
@@ -101,6 +126,100 @@ public class App extends Application {
             }
         });
 
+        //boton de borrador
+        btnBorrador.setOnAction(e -> {
+            lapiz = colorPicker.getValue();
+            colorPicker.setValue(Color.WHITE);
+        });
+
+        //Boton del lapiz
+        btnLapiz.setOnAction(e -> {
+            colorPicker.setValue(lapiz);
+        });
+
+
+        //Boton de guardar en mi propio formatio .dibu
+        btnGuardar.setOnAction(e -> {
+            String archivo = "";
+
+            String dibujo[][] = new String[WIDTH][HEIGHT];
+            Set<String> colores = new HashSet<>();
+            //Revisa los colores y los guarda de manera que no se repitan
+            for (int i = 0; i < WIDTH; i++) {
+                for (int j = 0; j < HEIGHT; j++) {
+                    Color color = (Color) rects[i][j].getFill();
+                    colores.add(String.format("#%02X%02X%02X",
+                        (int) (color.getRed() * 255),
+                        (int) (color.getGreen() * 255),
+                        (int) (color.getBlue() * 255)));
+                }
+            }
+            List<String> coloresList = new ArrayList<>(colores);
+            //Guarda los colores en un array de bytes
+            for (int i = 0; i < WIDTH; i++) {
+                for (int j = 0; j < HEIGHT; j++) {
+                    String tempColor = String.format("#%02X%02X%02X",
+                        (int) (((Color) rects[i][j].getFill()).getRed() * 255),
+                        (int) (((Color) rects[i][j].getFill()).getGreen() * 255),
+                        (int) (((Color) rects[i][j].getFill()).getBlue() * 255));
+                    byte lugar = (byte) coloresList.indexOf(tempColor);
+                    if(lugar != -1){
+                         String numerin = Integer.toBinaryString(lugar); // Convierte el número a binario y lo guarda en un String manteniendo los 0 a la izquierda
+                        while (numerin.length() < 8) {
+                            numerin = "0" + numerin;
+                    }
+                        dibujo[i][j] = numerin; // Guarda el numero en el array 
+                    }
+                    else
+                    System.out.println("Error al guardar");
+                    
+                }
+            }
+            //Imprime el array de bytes
+            for (int i = 0; i < WIDTH; i++) {
+                for (int j = 0; j < HEIGHT; j++) {
+                    
+                    System.out.print(dibujo[j][i]+", ");
+                }
+                System.out.println("");
+
+            }
+            System.out.println();
+
+            //Pasar la primera fila a hexadecimal
+            
+            
+            
+            
+            //----Guardar en el archivo----
+            //Guardar colores
+            archivo += coloresList.size() + " ";//Numero de colores
+            for (String string : coloresList) {
+                archivo += string + " ";
+            }
+            
+            //Tamaño del hexadecimal
+            //Guardar dibujo en hexadecimal por cada fila
+            String binario = "";
+            StringBuilder hexadecimal = new StringBuilder();
+            for (int i = 0; i < WIDTH; i++) {
+                for (int j = 0; j < HEIGHT; j++) {
+                    binario += dibujo[i][j];
+                }
+                for (int k = binario.length(); k > 0; k -= 4) {
+                    String cuarteto = binario.substring(k - 4, k);
+                    int valorDecimal = Integer.parseInt(cuarteto, 2);
+                    hexadecimal.insert(0, Integer.toHexString(valorDecimal).toUpperCase());//Tamaño del hexadecimal = 32
+                }
+                archivo += hexadecimal.toString() + " ";
+                binario = "";
+                hexadecimal = new StringBuilder();
+
+            }
+
+            System.out.println(archivo);
+        });
+
 
         // Detecta cuando el ratón es liberado
         grid.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> dragging = false);
@@ -115,6 +234,15 @@ public class App extends Application {
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("DibuJava"); // Título de la ventana
+
+        //Tamaño minimo por defecto
+        primaryStage.showingProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                primaryStage.setMinWidth(primaryStage.getWidth());
+                primaryStage.setMinHeight(primaryStage.getHeight());
+            }
+        });
+
         primaryStage.show(); // Muestra la ventana
     }
 
