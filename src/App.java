@@ -78,7 +78,7 @@ public class App extends Application {
         Label lbTitulo = new Label("DibuJava");
         lbTitulo.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         StackPane titulo = new StackPane(lbTitulo);
-        StackPane.setMargin(lbTitulo, new Insets(10));
+        StackPane.setMargin(lbTitulo, new Insets(-10, 0, 10, 0));
 
         // Menu bajo
 
@@ -162,7 +162,7 @@ public class App extends Application {
                 }
             }
             List<String> coloresList = new ArrayList<>(colores);
-            // Guarda los colores en un array de bytes
+            // Guarda los colores en un array 
             for (int i = 0; i < WIDTH; i++) {
                 for (int j = 0; j < HEIGHT; j++) {
                     String tempColor = String.format("#%02X%02X%02X",
@@ -209,6 +209,12 @@ public class App extends Application {
                 hexadecimal = new StringBuilder();
 
             }
+            // for (int i = 0; i < dibujo.length; i++) {
+            //     for (int j = 0; j < dibujo[0].length; j++) {
+            //         System.out.print(Integer.parseInt(dibujo[i][j],2)+", ");
+            //     }
+            //     System.out.println();
+            // }
             /*
              * 1. Guardar el numero de colores
              * 2. Guardar los colores
@@ -220,12 +226,12 @@ public class App extends Application {
             if (file != null) {
                 saveToFile(file, archivo);
             }
-            System.out.println(archivo);
+            // System.out.println(archivo);
         });
 
         // Boton de cargar
         btnCargar.setOnAction(e -> {
-            String[][] dibujo = new String[WIDTH][HEIGHT];
+            byte[][] dibujoBinario = new byte[WIDTH][HEIGHT];
             String archivo = "";
             // Cargar archivo
             File file = fileChooser.showOpenDialog(primaryStage); // Asume que primaryStage es tu Stage principal
@@ -233,7 +239,7 @@ public class App extends Application {
                 return;
             }
             archivo = abrirYLeerArchivo(file);
-            System.out.println(archivo);
+            // System.out.println(archivo);
             String[] datos = archivo.split(" ");
 
             // Sacar los colores
@@ -247,8 +253,8 @@ public class App extends Application {
             String binario = new String();
             for (int i = 0; i < hexadecimal.length; i++) {
                 hexadecimal[i] = datos[i + numeroColores + 1];
+
                 // Convertir los hexadecimales a binario
-                
                 for (char digitoHex : hexadecimal[i].toCharArray()) {
                     // Convertir el dígito hexadecimal a entero
                     int valorDecimal = Integer.parseInt(Character.toString(digitoHex), 16);
@@ -258,22 +264,33 @@ public class App extends Application {
                             ' ',
                             '0');
 
-                    binario= representacionBinaria;
+                    binario+= representacionBinaria;
                 }
+                // Guardar el binario en el array 
                 int cont = 0;
+                // System.out.println(binario);
                 for (int j = 0; j < WIDTH; j++) {
-                    dibujo[i][j] = (binario.substring(cont, cont+8));
-                    cont+=8;
+                    dibujoBinario[i][j] = (byte) (Integer.parseInt(binario.substring(cont, cont+8),2));
+                    // System.out.print(binario.substring(cont, cont+8)+", ");
+                    cont += 8;
                 }
+                // System.out.println();
+                binario = "";
             }
 
-            for (int i = 0; i < dibujo.length; i++) {
-                for (int j = 0; j < dibujo.length; j++) {
-                    System.out.print(dibujo[i][j]+", ");
-                }
-                System.out.println();
-            }
+            // for (int i = 0; i < dibujoBinario.length; i++) {
+            //     for (int j = 0; j < dibujoBinario.length; j++) {
+            //         System.out.print(dibujoBinario[i][j]+", ");
+            //     }
+            //     System.out.println();
+            // }
 
+            // Pintar el dibujo
+            for (int i = 0; i < WIDTH; i++) {
+                for (int j = 0; j < HEIGHT; j++) {
+                    pintarCeldas(i, j, colores[dibujoBinario[i][j]]);
+                }
+            }
             
 
         });
