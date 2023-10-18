@@ -1,3 +1,4 @@
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
@@ -162,7 +163,7 @@ public class App extends Application {
                 }
             }
             List<String> coloresList = new ArrayList<>(colores);
-            // Guarda los colores en un array 
+            // Guarda los colores en un array
             for (int i = 0; i < WIDTH; i++) {
                 for (int j = 0; j < HEIGHT; j++) {
                     String tempColor = String.format("#%02X%02X%02X",
@@ -210,10 +211,10 @@ public class App extends Application {
 
             }
             // for (int i = 0; i < dibujo.length; i++) {
-            //     for (int j = 0; j < dibujo[0].length; j++) {
-            //         System.out.print(Integer.parseInt(dibujo[i][j],2)+", ");
-            //     }
-            //     System.out.println();
+            // for (int j = 0; j < dibujo[0].length; j++) {
+            // System.out.print(Integer.parseInt(dibujo[i][j],2)+", ");
+            // }
+            // System.out.println();
             // }
             /*
              * 1. Guardar el numero de colores
@@ -264,13 +265,13 @@ public class App extends Application {
                             ' ',
                             '0');
 
-                    binario+= representacionBinaria;
+                    binario += representacionBinaria;
                 }
-                // Guardar el binario en el array 
+                // Guardar el binario en el array
                 int cont = 0;
                 // System.out.println(binario);
                 for (int j = 0; j < WIDTH; j++) {
-                    dibujoBinario[i][j] = (byte) (Integer.parseInt(binario.substring(cont, cont+8),2));
+                    dibujoBinario[i][j] = (byte) (Integer.parseInt(binario.substring(cont, cont + 8), 2));
                     // System.out.print(binario.substring(cont, cont+8)+", ");
                     cont += 8;
                 }
@@ -279,10 +280,10 @@ public class App extends Application {
             }
 
             // for (int i = 0; i < dibujoBinario.length; i++) {
-            //     for (int j = 0; j < dibujoBinario.length; j++) {
-            //         System.out.print(dibujoBinario[i][j]+", ");
-            //     }
-            //     System.out.println();
+            // for (int j = 0; j < dibujoBinario.length; j++) {
+            // System.out.print(dibujoBinario[i][j]+", ");
+            // }
+            // System.out.println();
             // }
 
             // Pintar el dibujo
@@ -291,7 +292,6 @@ public class App extends Application {
                     pintarCeldas(i, j, colores[dibujoBinario[i][j]]);
                 }
             }
-            
 
         });
 
@@ -299,6 +299,9 @@ public class App extends Application {
         grid.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> dragging = false);
 
         // -----------------Creacion de la Ventana----------------------------
+        // Establece el ícono
+        Image appIcon = new Image(getClass().getResourceAsStream("img/icono32x32.png"));
+        primaryStage.getIcons().add(appIcon);
         // Crear un margen
         StackPane root = new StackPane(leayer);
         StackPane.setMargin(leayer, new Insets(20));

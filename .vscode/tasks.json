@@ -1,0 +1,37 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "compile",
+            "type": "shell",
+            "command": "javac",
+            "args": [
+                "--module-path",
+                "C:\\Program Files\\Java\\javafx-sdk-21\\lib",
+                "--add-modules",
+                "javafx.controls,javafx.fxml",
+                "-d",
+                "bin",
+                "src/*.java"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "create-jar",
+            "type": "shell",
+            "command": "jar",
+            "args": [
+                "cfm",
+                "DibuJava.jar", // Nombre del archivo JAR que deseas crear
+                "manifest.txt",     // Ruta a tu archivo manifest.txt
+                "-C",
+                "bin",
+                "."                 // Esto incluye todos los archivos en el directorio bin en el JAR
+            ],
+            "group": "build"
+        }
+    ]
+}
